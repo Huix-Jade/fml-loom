@@ -30,6 +30,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import net.fabricmc.loom.LoomGradleExtension;
+
+import net.fabricmc.loom.LoomGradlePlugin;
+
+import net.fabricmc.loom.extension.LoomGradleExtensionImpl;
+
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.accesswidener.AccessWidenerReader;
@@ -78,7 +84,8 @@ public record ModAccessWidenerEntry(FabricModJson mod, String path, ModEnvironme
 
 		if (!header.getNamespace().equals(MappingsNamespace.NAMED.toString())) {
 			// Remap the AW if needed
-			visitor = getRemapper(visitor, remapper.get());
+//			visitor = getRemapper(visitor, remapper.get());
+			throw new IllegalStateException("All the AW in 1.6.4-MITE should be in NAMED: On mod " + mod.getId());
 		}
 
 		var reader = new AccessWidenerReader(visitor);

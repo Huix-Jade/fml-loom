@@ -52,7 +52,7 @@ public abstract class MixinExtensionApiImpl implements MixinExtensionAPI {
 				.convention(true);
 
 		this.refmapTargetNamespace = project.getObjects().property(String.class)
-				.convention(MappingsNamespace.INTERMEDIARY.toString());
+				.convention(MappingsNamespace.NAMED.toString());
 		this.refmapTargetNamespace.finalizeValueOnRead();
 
 		this.messages = project.getObjects().mapProperty(String.class, String.class);

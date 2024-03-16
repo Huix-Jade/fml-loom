@@ -86,6 +86,11 @@ public class GradleMappingContext implements MappingContext {
 	}
 
 	@Override
+	public File fmlPath() {
+		return this.extension.getFML();
+	}
+
+	@Override
 	public Path workingDirectory(String name) {
 		return new File(minecraftProvider().dir("layered/working_dir/" + workingDirName), name).toPath();
 	}

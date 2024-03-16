@@ -57,11 +57,11 @@ public final class TransitiveAccessWidenerMappingsProcessor implements Minecraft
 			return false;
 		}
 
-		if (!MappingsNamespace.INTERMEDIARY.toString().equals(mappings.getSrcNamespace())) {
-			throw new IllegalStateException("Mapping tree must have intermediary src mappings not " + mappings.getSrcNamespace());
-		}
+//		if (!MappingsNamespace.INTERMEDIARY.toString().equals(mappings.getSrcNamespace())) {
+//			throw new IllegalStateException("Mapping tree must have intermediary src mappings not " + mappings.getSrcNamespace());
+//		}
 
-		try (LazyCloseable<TinyRemapper> remapper = context.createRemapper(MappingsNamespace.INTERMEDIARY, MappingsNamespace.NAMED)) {
+		try (LazyCloseable<TinyRemapper> remapper = context.createRemapper(MappingsNamespace.NAMED, MappingsNamespace.NAMED)) {
 			for (AccessWidenerEntry accessWidener : accessWideners) {
 				var visitor = new MappingCommentVisitor(accessWidener.mappingId(), mappings);
 				accessWidener.read(visitor, remapper);

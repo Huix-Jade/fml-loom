@@ -52,7 +52,6 @@ import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.LoomGradlePlugin;
-import net.fabricmc.loom.task.RemapTaskConfiguration;
 import net.fabricmc.loom.util.ZipReprocessorUtil;
 import net.fabricmc.loom.util.fmj.FabricModJsonFactory;
 
@@ -113,14 +112,14 @@ public final class IncludedJarFactory {
 				// Get the outputs of the project
 				final Project dependentProject = projectDependency.getDependencyProject();
 
-				Collection<Task> remapJarTasks = dependentProject.getTasksByName(RemapTaskConfiguration.REMAP_JAR_TASK_NAME, false);
+//				Collection<Task> remapJarTasks = dependentProject.getTasksByName(RemapTaskConfiguration.REMAP_JAR_TASK_NAME, false);
 				Collection<Task> jarTasks = dependentProject.getTasksByName(JavaPlugin.JAR_TASK_NAME, false);
 
-				if (remapJarTasks.isEmpty() && jarTasks.isEmpty()) {
+				if (jarTasks.isEmpty()) {
 					throw new UnsupportedOperationException("%s does not have a remapJar or jar task, cannot nest it".formatted(dependentProject.getName()));
 				}
 
-				for (Task task : remapJarTasks.isEmpty() ? jarTasks : remapJarTasks) {
+				for (Task task : jarTasks) {
 					if (task instanceof AbstractArchiveTask archiveTask) {
 						final Metadata metadata = new Metadata(
 								projectDependency.getGroup(),

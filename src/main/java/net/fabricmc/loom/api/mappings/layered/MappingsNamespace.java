@@ -60,7 +60,7 @@ public enum MappingsNamespace {
 	public static @Nullable MappingsNamespace of(String namespace) {
 		return switch (namespace) {
 		case "official" -> OFFICIAL;
-		case "intermediary" -> INTERMEDIARY;
+		case "intermediary" -> NAMED;
 		case "named" -> NAMED;
 		default -> null;
 		};

@@ -151,6 +151,11 @@ abstract class LayeredMappingsSpecification extends Specification implements Lay
 		}
 
 		@Override
+		File fmlPath() {
+			throw new UnsupportedOperationException("TODO")
+		}
+
+		@Override
 		Path workingDirectory(String name) {
 			return new File(tempDir, name).toPath()
 		}

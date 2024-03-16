@@ -100,7 +100,7 @@ public class FileDependencyInfo extends DependencyInfo {
 			byte[] modJson;
 
 			try {
-				if ("jar".equals(FilenameUtils.getExtension(root.getName())) && (modJson = ZipUtils.unpackNullable(root.toPath(), "fabric.mod.json")) != null) {
+				if ("jar".equals(FilenameUtils.getExtension(root.getName())) && (modJson = ZipUtils.unpackNullable(root.toPath(), "fml.mod.json")) != null) {
 					//It's a Fabric mod, see how much we can extract out
 					JsonObject json = new Gson().fromJson(new String(modJson, StandardCharsets.UTF_8), JsonObject.class);
 

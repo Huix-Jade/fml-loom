@@ -91,7 +91,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	private final Property<MinecraftJarConfiguration> minecraftJarConfiguration;
 	private final Property<Boolean> splitEnvironmentalSourceSet;
 	private final InterfaceInjectionExtensionAPI interfaceInjectionExtension;
-
+	private final RegularFileProperty fmlFile;
 	private final NamedDomainObjectContainer<RunConfigSettings> runConfigs;
 	private final NamedDomainObjectContainer<DecompilerOptions> decompilers;
 	private final NamedDomainObjectContainer<ModSettings> mods;
@@ -107,6 +107,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 				.empty();
 		this.log4jConfigs = project.files(directories.getDefaultLog4jConfigFile());
 		this.accessWidener = project.getObjects().fileProperty();
+		this.fmlFile = project.getObjects().fileProperty();
 		this.customManifest = project.getObjects().property(String.class);
 		this.knownIndyBsms = project.getObjects().setProperty(String.class).convention(Set.of(
 				"java/lang/invoke/StringConcatFactory",
@@ -141,6 +142,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.minecraftJarConfiguration.finalizeValueOnRead();
 
 		this.accessWidener.finalizeValueOnRead();
+		this.fmlFile.finalizeValueOnRead();
 		this.getGameJarProcessors().finalizeValueOnRead();
 
 		this.runtimeOnlyLog4j = project.getObjects().property(Boolean.class).convention(false);
@@ -200,12 +202,27 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	}
 
 	@Override
-	public Dependency officialMojangMappings() {
-		if (layeredSpecBuilderScope.get()) {
-			throw new IllegalStateException("Use `officialMojangMappings()` when configuring layered mappings, not the extension method `loom.officialMojangMappings()`");
-		}
+	public Dependency fmlMCPMappings() {
+//		if (layeredSpecBuilderScope.get()) {
+//			throw new IllegalStateException("Use `officialMojangMappings()` when configuring layered mappings, not the extension method `loom.officialMojangMappings()`");
+//		}
 
-		return layered(LayeredMappingSpecBuilder::officialMojangMappings);
+		return layered(layeredMappingSpecBuilder -> layeredMappingSpecBuilder.fml(this.getFML()));
+	}
+
+	@Override
+	public File getFML() {
+		return fmlFile.getAsFile().get();
+	}
+
+	@Override
+	public void setFML(File fmlFile) {
+		this.fmlFile.fileValue(fmlFile);
+	}
+
+	@Override
+	public void setFML(String fmlVer) {
+		throw new UnsupportedOperationException("Currently, FML should be specified in file, please use setFML(fmlFile)");
 	}
 
 	@Override

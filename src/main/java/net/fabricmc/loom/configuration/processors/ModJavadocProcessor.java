@@ -133,9 +133,9 @@ public abstract class ModJavadocProcessor implements MinecraftJarProcessor<ModJa
 				throw new UncheckedIOException("Failed to read javadoc from mod: " + modId, e);
 			}
 
-			if (!mappings.getSrcNamespace().equals(MappingsNamespace.INTERMEDIARY.toString())) {
-				throw new IllegalStateException("Javadoc provided by mod (%s) must be have an intermediary source namespace".formatted(modId));
-			}
+//			if (!mappings.getSrcNamespace().equals(MappingsNamespace.INTERMEDIARY.toString())) {
+//				throw new IllegalStateException("Javadoc provided by mod (%s) must be have an intermediary source namespace".formatted(modId));
+//			}
 
 			if (!mappings.getDstNamespaces().isEmpty()) {
 				throw new IllegalStateException("Javadoc provided by mod (%s) must not contain any dst names".formatted(modId));

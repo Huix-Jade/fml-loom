@@ -45,6 +45,7 @@ import net.fabricmc.loom.util.gradle.GradleUtils;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 import net.fabricmc.loom.util.gradle.SyncTaskBuildService;
 
+//We dont need remap task anymore
 public abstract class RemapTaskConfiguration implements Runnable {
 	public static final String REMAP_JAR_TASK_NAME = "remapJar";
 	public static final String REMAP_SOURCES_JAR_TASK_NAME = "remapSourcesJar";
@@ -63,60 +64,9 @@ public abstract class RemapTaskConfiguration implements Runnable {
 
 	public void run() {
 		final LoomGradleExtension extension = LoomGradleExtension.get(getProject());
-
 		SyncTaskBuildService.register(getProject());
-
-		if (GradleUtils.getBooleanProperty(getProject(), Constants.Properties.DONT_REMAP)) {
-			extension.getUnmappedModCollection().from(getTasks().getByName(JavaPlugin.JAR_TASK_NAME));
-			return;
-		}
-
-		Action<RemapJarTask> remapJarTaskAction = task -> {
-			final AbstractArchiveTask jarTask = getTasks().named(JavaPlugin.JAR_TASK_NAME, AbstractArchiveTask.class).get();
-
-			// Basic task setup
-			task.dependsOn(jarTask);
-			task.setDescription("Remaps the built project jar to intermediary mappings.");
-			task.setGroup(Constants.TaskGroup.FABRIC);
-			getArtifacts().add(JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME, task);
-			getArtifacts().add(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME, task);
-
-			// Setup the input file and the nested deps
-			task.getInputFile().convention(jarTask.getArchiveFile());
-			task.dependsOn(getTasks().named(JavaPlugin.JAR_TASK_NAME));
-			task.getIncludesClientOnlyClasses().set(getProject().provider(extension::areEnvironmentSourceSetsSplit));
-		};
-
-		// must not be lazy to ensure that the prepare tasks get setup for other projects to depend on.
-		// Being lazy also breaks maven publishing, see: https://github.com/FabricMC/fabric-loom/issues/1023
-		getTasks().create(REMAP_JAR_TASK_NAME, RemapJarTask.class, remapJarTaskAction);
-
-		// Configure the default jar task
-		getTasks().named(JavaPlugin.JAR_TASK_NAME, AbstractArchiveTask.class).configure(task -> {
-			task.getArchiveClassifier().convention("dev");
-			task.getDestinationDirectory().set(getProject().getLayout().getBuildDirectory().map(directory -> directory.dir("devlibs")));
-		});
-
-		getTasks().named(BasePlugin.ASSEMBLE_TASK_NAME).configure(task -> task.dependsOn(getTasks().named(REMAP_JAR_TASK_NAME)));
-
-		trySetupSourceRemapping();
-
-		if (GradleUtils.getBooleanProperty(getProject(), Constants.Properties.DISABLE_REMAPPED_VARIANTS)) {
-			return;
-		}
-
-		GradleUtils.afterSuccessfulEvaluation(getProject(), () -> {
-			// Remove -dev jars from the default jar task
-			for (String configurationName : new String[] { JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME, JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME }) {
-				Configuration configuration = getConfigurations().getByName(configurationName);
-				final Jar jarTask = (Jar) getTasks().getByName(JavaPlugin.JAR_TASK_NAME);
-				configuration.getArtifacts().removeIf(artifact -> {
-					// if the artifact is built by the jar task, and has the same output path.
-					return artifact.getFile().getAbsolutePath().equals(jarTask.getArchiveFile().get().getAsFile().getAbsolutePath()) && artifact.getBuildDependencies().getDependencies(null).contains(jarTask);
-				});
-			}
-		});
-	}
+        extension.getUnmappedModCollection().from(getTasks().getByName(JavaPlugin.JAR_TASK_NAME));
+    }
 
 	private void trySetupSourceRemapping() {
 		final LoomGradleExtension extension = LoomGradleExtension.get(getProject());

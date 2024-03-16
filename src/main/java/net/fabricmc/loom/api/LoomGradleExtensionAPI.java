@@ -39,6 +39,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.internal.enterprise.test.FileProperty;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
@@ -81,7 +82,12 @@ public interface LoomGradleExtensionAPI {
 
 	ConfigurableFileCollection getLog4jConfigs();
 
-	Dependency officialMojangMappings();
+	void setFML(String fmlVer);
+	void setFML(File fmlFile);
+
+	File getFML();
+
+	Dependency fmlMCPMappings();
 
 	Dependency layered(Action<LayeredMappingSpecBuilder> action);
 
@@ -180,7 +186,6 @@ public interface LoomGradleExtensionAPI {
 	/**
 	 * An Experimental option to provide empty intermediate mappings, to be used for game versions without any intermediate mappings.
 	 */
-	@ApiStatus.Experimental
 	default void noIntermediateMappings() {
 		setIntermediateMappingsProvider(NoOpIntermediateMappingsProvider.class, p -> { });
 	}
@@ -207,6 +212,10 @@ public interface LoomGradleExtensionAPI {
 
 	default void serverOnlyMinecraftJar() {
 		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.SERVER_ONLY);
+	}
+
+	default void mergedMinecraftJar() {
+		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.MERGED);
 	}
 
 	default void clientOnlyMinecraftJar() {

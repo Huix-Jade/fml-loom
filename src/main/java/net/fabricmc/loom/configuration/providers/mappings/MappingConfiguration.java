@@ -83,7 +83,7 @@ public class MappingConfiguration {
 		this.mappingsIdentifier = mappingsIdentifier;
 
 		this.mappingsWorkingDir = mappingsWorkingDir;
-		this.baseTinyMappings = mappingsWorkingDir.resolve("mappings-base.tiny");
+		this.baseTinyMappings = mappingsWorkingDir.resolve("mappings.tiny");
 		this.tinyMappings = mappingsWorkingDir.resolve("mappings.tiny");
 		this.tinyMappingsJar = mappingsWorkingDir.resolve("mappings.jar");
 		this.unpickDefinitions = mappingsWorkingDir.resolve("mappings.unpick");
@@ -174,9 +174,9 @@ public class MappingConfiguration {
 
 		if (areMappingsV2(baseTinyMappings)) {
 			// These are unmerged v2 mappings
-			IntermediateMappingsService intermediateMappingsService = IntermediateMappingsService.getInstance(serviceManager, project, minecraftProvider);
-
-			MappingsMerger.mergeAndSaveMappings(baseTinyMappings, tinyMappings, intermediateMappingsService);
+//			IntermediateMappingsService intermediateMappingsService = IntermediateMappingsService.getInstance(serviceManager, project, minecraftProvider);
+//
+//			MappingsMerger.mergeAndSaveMappings(baseTinyMappings, tinyMappings, intermediateMappingsService);
 		} else {
 			final List<Path> minecraftJars = minecraftProvider.getMinecraftJars();
 

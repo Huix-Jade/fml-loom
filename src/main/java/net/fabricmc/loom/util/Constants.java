@@ -96,16 +96,16 @@ public class Constants {
 		}
 	}
 
-	public static final class Knot {
-		public static final String KNOT_CLIENT = "net.fabricmc.loader.launch.knot.KnotClient";
-		public static final String KNOT_SERVER = "net.fabricmc.loader.launch.knot.KnotServer";
+	public static final class FML {
+		public static final String FML_CLIENT = "net.xiaoyu233.fml.relaunch.client.Main";
+		public static final String FML_SERVER = "net.xiaoyu233.fml.relaunch.server.Main";
 
-		private Knot() {
+		private FML() {
 		}
 	}
 
 	public static final class TaskGroup {
-		public static final String FABRIC = "fabric";
+		public static final String FABRIC = "fml";
 		public static final String IDE = "ide";
 
 		private TaskGroup() {

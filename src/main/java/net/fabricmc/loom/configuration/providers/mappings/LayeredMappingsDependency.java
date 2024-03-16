@@ -102,7 +102,7 @@ public class LayeredMappingsDependency implements SelfResolvingDependency, FileC
 			var tiny2Writer = new Tiny2FileWriter(writer, false);
 
 			MappingDstNsReorder nsReorder = new MappingDstNsReorder(tiny2Writer, Collections.singletonList(MappingsNamespace.NAMED.toString()));
-			MappingSourceNsSwitch nsSwitch = new MappingSourceNsSwitch(nsReorder, MappingsNamespace.INTERMEDIARY.toString(), true);
+			MappingSourceNsSwitch nsSwitch = new MappingSourceNsSwitch(nsReorder, MappingsNamespace.OFFICIAL.toString(), true);
 			AddConstructorMappingVisitor addConstructor = new AddConstructorMappingVisitor(nsSwitch);
 			mappings.accept(addConstructor);
 

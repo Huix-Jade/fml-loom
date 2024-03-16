@@ -195,17 +195,18 @@ public class ModConfigurationRemapper {
 			final boolean refreshDeps = LoomGradleExtension.get(project).refreshDeps();
 			// TODO: With the same artifacts being considered multiple times for their different
 			//   usage attributes, this should probably not process them multiple times even with refreshDeps.
-			final List<ModDependency> toRemap = modDependencies.stream()
-					.filter(dependency -> refreshDeps || dependency.isCacheInvalid(project, null))
-					.toList();
+//			final List<ModDependency> toRemap = modDependencies.stream()
+//					.filter(dependency -> refreshDeps || dependency.isCacheInvalid(project, null))
+//					.toList();
 
-			if (!toRemap.isEmpty()) {
-				try {
-					new ModProcessor(project, sourceConfig, serviceManager).processMods(toRemap);
-				} catch (IOException e) {
-					throw new UncheckedIOException("Failed to remap mods", e);
-				}
-			}
+			//MITE Loom: We dont have to remap
+//			if (!toRemap.isEmpty()) {
+//				try {
+//					new ModProcessor(project, sourceConfig, serviceManager).processMods(toRemap);
+//				} catch (IOException e) {
+//					throw new UncheckedIOException("Failed to remap mods", e);
+//				}
+//			}
 
 			// Add all of the remapped mods onto the config
 			for (ModDependency info : modDependencies) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of fabric-loom, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2022-2023 FabricMC
+ * Copyright (c) 2022 FabricMC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,34 @@
  * SOFTWARE.
  */
 
-package net.fabricmc.loom.configuration.processors;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Path;
+package net.fabricmc.loom.configuration.providers.mappings.fml_mcp;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
-import net.fabricmc.loom.configuration.ConfigContext;
-import net.fabricmc.loom.util.LazyCloseable;
-import net.fabricmc.loom.util.TinyRemapperHelper;
-import net.fabricmc.tinyremapper.TinyRemapper;
+import net.fabricmc.loom.api.mappings.layered.spec.FileSpec;
+import net.fabricmc.loom.api.mappings.layered.spec.MCPMappingsSpecBuilder;
 
-public final class ContextImplHelper {
-	private ContextImplHelper() {
+import java.util.Optional;
+
+public class MCPMappingsSpecBuilderImpl implements MCPMappingsSpecBuilder {
+	/**
+	 * The mapping path of regular mapping dependencies.
+	 */
+	private static final String DEFAULT_MAPPING_PATH = "mappings.tiny";
+
+	private final Optional<FileSpec> fmlFileSpec;
+    private final String fallbackSourceNamespace = MappingsNamespace.OFFICIAL.toString();
+	private final String fallbackTargetNamespace = MappingsNamespace.NAMED.toString();
+    private String mergeNamespace = MappingsNamespace.OFFICIAL.toString();
+
+	private MCPMappingsSpecBuilderImpl(Optional<FileSpec> fileSpec) {
+		this.fmlFileSpec = fileSpec;
 	}
 
-	public static LazyCloseable<TinyRemapper> createRemapper(ConfigContext configContext, MappingsNamespace from, MappingsNamespace to) {
-		return new LazyCloseable<>(() -> {
-			try {
-				TinyRemapper tinyRemapper = TinyRemapperHelper.getTinyRemapper(configContext.project(), configContext.serviceManager(), from.toString(), to.toString());
+	public static MCPMappingsSpecBuilderImpl builder(Optional<FileSpec> fileSpec) {
+		return new MCPMappingsSpecBuilderImpl(fileSpec);
+	}
 
-				for (Path minecraftJar : configContext.extension().getMinecraftJars(MappingsNamespace.NAMED)) {
-					tinyRemapper.readClassPath(minecraftJar);
-				}
-
-				return tinyRemapper;
-			} catch (IOException e) {
-				throw new UncheckedIOException("Failed to create tiny remapper", e);
-			}
-		}, TinyRemapper::finish);
+	public MCPMappingsSpec build() {
+        return new MCPMappingsSpec(fmlFileSpec, DEFAULT_MAPPING_PATH, fallbackSourceNamespace, fallbackTargetNamespace, mergeNamespace);
 	}
 }

@@ -24,6 +24,7 @@
 
 package net.fabricmc.loom.api.mappings.layered;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
@@ -47,6 +48,8 @@ public interface MappingContext {
 	Supplier<MemoryMappingTree> intermediaryTree();
 
 	MinecraftProvider minecraftProvider();
+
+	File fmlPath();
 
 	default String minecraftVersion() {
 		return minecraftProvider().minecraftVersion();

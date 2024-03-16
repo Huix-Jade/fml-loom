@@ -59,11 +59,10 @@ public abstract class GenerateDLIConfigTask extends AbstractLoomTask {
 				.property("fabric.remapClasspathFile", getExtension().getFiles().getRemapClasspathFile().getAbsolutePath())
 				.property("log4j.configurationFile", getAllLog4JConfigFiles())
 				.property("log4j2.formatMsgNoLookups", "true")
-
-				.argument("client", "--assetIndex")
-				.argument("client", getExtension().getMinecraftProvider().getVersionInfo().assetIndex().fabricId(getExtension().getMinecraftProvider().minecraftVersion()))
 				.argument("client", "--assetsDir")
-				.argument("client", assetsDirectory.getAbsolutePath());
+				.argument("client", assetsDirectory.getAbsolutePath())
+				.argument("client", "--version")
+				.argument("client", versionInfo.id());
 
 		if (versionInfo.hasNativesToExtract()) {
 			String nativesPath = getExtension().getFiles().getNativesDirectory(getProject()).getAbsolutePath();

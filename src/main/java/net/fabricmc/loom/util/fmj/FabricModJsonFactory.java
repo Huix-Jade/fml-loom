@@ -46,7 +46,7 @@ import net.fabricmc.loom.util.ZipUtils;
 import net.fabricmc.loom.util.gradle.SourceSetHelper;
 
 public final class FabricModJsonFactory {
-	private static final String FABRIC_MOD_JSON = "fabric.mod.json";
+	private static final String FABRIC_MOD_JSON = "fml.mod.json";
 
 	private FabricModJsonFactory() {
 	}
@@ -72,7 +72,7 @@ public final class FabricModJsonFactory {
 		try {
 			return create(ZipUtils.unpackGson(zipPath, FABRIC_MOD_JSON, JsonObject.class), new FabricModJsonSource.ZipSource(zipPath));
 		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to read fabric.mod.json file in zip: " + zipPath, e);
+			throw new UncheckedIOException("Failed to read fml.mod.json file in zip: " + zipPath, e);
 		}
 	}
 

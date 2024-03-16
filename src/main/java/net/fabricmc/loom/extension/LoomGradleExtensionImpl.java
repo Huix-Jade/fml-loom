@@ -24,6 +24,7 @@
 
 package net.fabricmc.loom.extension;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -80,13 +81,7 @@ public class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl implemen
 		this.unmappedMods = project.files();
 
 		// Setup the default intermediate mappings provider.
-		setIntermediateMappingsProvider(IntermediaryMappingsProvider.class, provider -> {
-			provider.getIntermediaryUrl()
-					.convention(getIntermediaryUrl())
-					.finalizeValueOnRead();
-
-			provider.getRefreshDeps().set(project.provider(() -> LoomGradleExtension.get(project).refreshDeps()));
-		});
+		noIntermediateMappings();
 
 		refreshDeps = manualRefreshDeps();
 		multiProjectOptimisation = GradleUtils.getBooleanPropertyProvider(project, Constants.Properties.MULTI_PROJECT_OPTIMISATION);
@@ -156,7 +151,8 @@ public class LoomGradleExtensionImpl extends LoomGradleExtensionApiImpl implemen
 
 	@Override
 	public void setIntermediaryMinecraftProvider(IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider) {
-		this.intermediaryMinecraftProvider = intermediaryMinecraftProvider;
+		//We dont have intermediary
+//		this.intermediaryMinecraftProvider = intermediaryMinecraftProvider;
 	}
 
 	@Override

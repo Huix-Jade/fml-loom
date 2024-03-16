@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.gradle.api.Named;
@@ -123,6 +124,7 @@ public class RunConfigSettings implements Named {
 
 	private final Project project;
 	private final LoomGradleExtension extension;
+	private String username;
 
 	@Inject
 	public RunConfigSettings(Project project, String name) {
@@ -236,6 +238,19 @@ public class RunConfigSettings implements Named {
 		setConfigName(name);
 	}
 
+	public void username(String username){
+		this.programArgs("--username", username);
+	}
+
+	public void setUsername(String username){
+		this.username(username);
+	}
+
+	@Nullable
+	public String getUsername() {
+		return username;
+	}
+
 	public void defaultMainClass(String cls) {
 		setDefaultMainClass(cls);
 	}
@@ -323,7 +338,7 @@ public class RunConfigSettings implements Named {
 	public void client() {
 		startFirstThread();
 		environment("client");
-		defaultMainClass(Constants.Knot.KNOT_CLIENT);
+		defaultMainClass(Constants.FML.FML_CLIENT);
 
 		if (Platform.CURRENT.isRaspberryPi()) {
 			getProject().getLogger().info("Raspberry Pi detected, setting MESA_GL_VERSION_OVERRIDE=4.3");
@@ -337,7 +352,7 @@ public class RunConfigSettings implements Named {
 	public void server() {
 		programArg("nogui");
 		environment("server");
-		defaultMainClass(Constants.Knot.KNOT_SERVER);
+		defaultMainClass(Constants.FML.FML_SERVER);
 	}
 
 	/**

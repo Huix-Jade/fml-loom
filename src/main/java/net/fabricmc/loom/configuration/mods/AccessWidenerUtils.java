@@ -45,13 +45,14 @@ public class AccessWidenerUtils {
 		int version = AccessWidenerReader.readVersion(input);
 
 		AccessWidenerWriter writer = new AccessWidenerWriter(version);
-		AccessWidenerRemapper awRemapper = new AccessWidenerRemapper(
-				writer,
-				remapper,
-				MappingsNamespace.INTERMEDIARY.toString(),
-				MappingsNamespace.NAMED.toString()
-		);
-		AccessWidenerReader reader = new AccessWidenerReader(awRemapper);
+		//MITE Loom: We dont have to remap
+//		AccessWidenerRemapper awRemapper = new AccessWidenerRemapper(
+//				writer,
+//				remapper,
+//				MappingsNamespace.INTERMEDIARY.toString(),
+//				MappingsNamespace.NAMED.toString()
+//		);
+		AccessWidenerReader reader = new AccessWidenerReader(writer);
 		reader.read(input);
 		return writer.write();
 	}

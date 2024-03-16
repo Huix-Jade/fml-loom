@@ -440,7 +440,7 @@ public abstract class GenerateSourcesTask extends AbstractLoomTask {
 		MemoryMappingTree mappingTree = new MemoryMappingTree();
 
 		try (Reader reader = Files.newBufferedReader(inputMappings, StandardCharsets.UTF_8)) {
-			MappingReader.read(reader, new MappingSourceNsSwitch(mappingTree, MappingsNamespace.INTERMEDIARY.toString()));
+			MappingReader.read(reader, new MappingSourceNsSwitch(mappingTree, MappingsNamespace.NAMED.toString()));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to read mappings", e);
 		}

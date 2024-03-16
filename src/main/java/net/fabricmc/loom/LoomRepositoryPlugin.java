@@ -92,11 +92,12 @@ public class LoomRepositoryPlugin implements Plugin<PluginAware> {
 		repositories.mavenCentral();
 	}
 
-	private void declareLocalRepositories(RepositoryHandler repositories, LoomFiles files) {
-		repositories.maven(repo -> {
-			repo.setName("LoomLocalRemappedMods");
-			repo.setUrl(files.getRemappedModCache());
-		});
+	private void declareLocalRepositories(@NotNull RepositoryHandler repositories, LoomFiles files) {
+		//MTIE Loom: We dont have remapped mods
+//		repositories.maven(repo -> {
+//			repo.setName("LoomLocalRemappedMods");
+//			repo.setUrl(files.getRemappedModCache());
+//		});
 
 		repositories.maven(repo -> {
 			repo.setName("LoomGlobalMinecraft");

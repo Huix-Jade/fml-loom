@@ -24,6 +24,7 @@
 
 package net.fabricmc.loom.configuration.ide;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -37,12 +38,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+
+import net.fabricmc.loom.configuration.providers.minecraft.MinecraftVersionMeta;
+
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
@@ -54,12 +57,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import net.fabricmc.loom.LoomGradleExtension;
-import net.fabricmc.loom.configuration.InstallerData;
 import net.fabricmc.loom.configuration.ide.idea.IdeaSyncTask;
 import net.fabricmc.loom.configuration.ide.idea.IdeaUtils;
 import net.fabricmc.loom.configuration.providers.BundleMetadata;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.gradle.SourceSetReference;
+
+import javax.annotation.Nullable;
 
 public class RunConfig {
 	public String configName;
@@ -111,16 +115,37 @@ public class RunConfig {
 		return e;
 	}
 
-	private static void populate(Project project, LoomGradleExtension extension, RunConfig runConfig, String environment, boolean appendProjectPath) {
+	private static void populateSide(Project project, LoomGradleExtension extension, RunConfig runConfig, String environment, @Nullable String usernameOverride, boolean appendProjectPath) {
 		if (appendProjectPath && !extension.isRootProject()) {
 			runConfig.configName += " (" + project.getPath() + ")";
 		}
 
 		runConfig.eclipseProjectName = project.getExtensions().getByType(EclipseModel.class).getProject().getName();
+//		if (Objects.equals(environment, "client")){
+//			runConfig.programArgs.add("--version");
+//			runConfig.programArgs.add(extension.getMinecraftVersion().get());
+//			runConfig.programArgs.add("--assetsDir");
+//			final MinecraftVersionMeta versionInfo = extension.getMinecraftProvider().getVersionInfo();
+//			File assetsDirectory = new File(extension.getFiles().getUserCache(), "assets");
+//
+//			if (versionInfo.assets().equals("legacy")) {
+//				assetsDirectory = new File(assetsDirectory, "/legacy/" + versionInfo.id());
+//			}
+//			runConfig.programArgs.add(assetsDirectory.getAbsolutePath());
+//			runConfig.programArgs.add("--username");
+//            runConfig.programArgs.add(Objects.requireNonNullElseGet(usernameOverride, () -> "Player" + new Random().nextInt(1000)));
+//			runConfig.programArgs.add("--gameDir");
+//			runConfig.programArgs.add(runConfig.runDir);
+//			if (versionInfo.hasNativesToExtract()) {
+//				String nativePath = extension.getFiles().getNativesDirectory(project).getAbsolutePath();
+//				runConfig.vmArgs.add("-Djava.library.path=" + nativePath);
+//				runConfig.vmArgs.add("-Dorg.lwjgl.librarypath=" + nativePath);
+//			}
+//		}
 
-		runConfig.mainClass = "net.fabricmc.devlaunchinjector.Main";
-		runConfig.vmArgs.add("-Dfabric.dli.config=" + encodeEscaped(extension.getFiles().getDevLauncherConfig().getAbsolutePath()));
-		runConfig.vmArgs.add("-Dfabric.dli.env=" + environment.toLowerCase());
+		runConfig.mainClass = "net.xiaoyu233.fml.relaunch.DevLaunchInjector";
+		runConfig.vmArgs.add("-Dfml.dli.config=" + encodeEscaped(extension.getFiles().getDevLauncherConfig().getAbsolutePath()));
+		runConfig.vmArgs.add("-Dfml.dli.env=" + environment.toLowerCase());
 	}
 
 	// Turns camelCase/PascalCase into Capital Case
@@ -173,7 +198,7 @@ public class RunConfig {
 		boolean appendProjectPath = settings.getAppendProjectPathToConfigName().get();
 		RunConfig runConfig = new RunConfig();
 		runConfig.configName = configName;
-		populate(project, extension, runConfig, environment, appendProjectPath);
+		populateSide(project, extension, runConfig, environment, settings.getUsername(), appendProjectPath);
 		runConfig.ideaModuleName = IdeaUtils.getIdeaModuleName(new SourceSetReference(sourceSet, project));
 		runConfig.runDirIdeaUrl = "file://$PROJECT_DIR$/" + runDir;
 		runConfig.runDir = runDir;
@@ -183,7 +208,7 @@ public class RunConfig {
 		// Custom parameters
 		runConfig.programArgs.addAll(settings.getProgramArgs());
 		runConfig.vmArgs.addAll(settings.getVmArgs());
-		runConfig.vmArgs.add("-Dfabric.dli.main=" + mainClass);
+		runConfig.vmArgs.add("-Dfml.dli.main=" + mainClass);
 		runConfig.environmentVariables = new HashMap<>();
 		runConfig.environmentVariables.putAll(settings.getEnvironmentVariables());
 		runConfig.projectName = project.getName();
@@ -250,32 +275,6 @@ public class RunConfig {
 	}
 
 	static String getMainClass(String side, LoomGradleExtension extension, String defaultMainClass) {
-		InstallerData installerData = extension.getInstallerData();
-
-		if (installerData == null) {
-			return defaultMainClass;
-		}
-
-		JsonObject installerJson = installerData.installerJson();
-
-		if (installerJson != null && installerJson.has("mainClass")) {
-			JsonElement mainClassJson = installerJson.get("mainClass");
-
-			String mainClassName = "";
-
-			if (mainClassJson.isJsonObject()) {
-				JsonObject mainClassesJson = mainClassJson.getAsJsonObject();
-
-				if (mainClassesJson.has(side)) {
-					mainClassName = mainClassesJson.get(side).getAsString();
-				}
-			} else {
-				mainClassName = mainClassJson.getAsString();
-			}
-
-			return mainClassName;
-		}
-
 		return defaultMainClass;
 	}
 

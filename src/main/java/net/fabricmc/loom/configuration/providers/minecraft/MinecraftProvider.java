@@ -25,6 +25,7 @@
 package net.fabricmc.loom.configuration.providers.minecraft;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -74,19 +75,19 @@ public abstract class MinecraftProvider {
 	public void provide() throws Exception {
 		final DependencyInfo dependency = DependencyInfo.create(getProject(), Constants.Configurations.MINECRAFT);
 		minecraftVersion = dependency.getDependency().getVersion();
-
+		if (!Objects.equals(minecraftVersion, "1.6.4-MITE")) throw new UnsupportedOperationException("This version of loom only support for 1.6.4-MITE");
 		initFiles();
 
 		metadataProvider = new MinecraftMetadataProvider(
 				MinecraftMetadataProvider.Options.create(
-						minecraftVersion,
+						"1.6.4",
 						getProject(),
 						file("minecraft-info.json").toPath()
 				),
 				getExtension()::download
 		);
 
-		downloadJars();
+		checkJars();
 
 		if (provideServer()) {
 			serverBundleMetadata = BundleMetadata.fromJar(minecraftServerJar.toPath());
@@ -101,33 +102,18 @@ public abstract class MinecraftProvider {
 		workingDir.mkdirs();
 
 		if (provideClient()) {
-			minecraftClientJar = file("minecraft-client.jar");
+			minecraftClientJar = file("1.6.4-MITE.jar");
 		}
 
 		if (provideServer()) {
-			minecraftServerJar = file("minecraft-server.jar");
+			minecraftServerJar = file("1.6.4-MITE.jar");
 			minecraftExtractedServerJar = file("minecraft-extracted_server.jar");
 		}
 	}
 
-	private void downloadJars() throws IOException {
-		try (ProgressGroup progressGroup = new ProgressGroup(getProject(), "Download Minecraft jars");
-				DownloadExecutor executor = new DownloadExecutor(2)) {
-			if (provideClient()) {
-				final MinecraftVersionMeta.Download client = getVersionInfo().download("client");
-				getExtension().download(client.url())
-						.sha1(client.sha1())
-						.progress(new GradleDownloadProgressListener("Minecraft client", progressGroup::createProgressLogger))
-						.downloadPathAsync(minecraftClientJar.toPath(), executor);
-			}
-
-			if (provideServer()) {
-				final MinecraftVersionMeta.Download server = getVersionInfo().download("server");
-				getExtension().download(server.url())
-						.sha1(server.sha1())
-						.progress(new GradleDownloadProgressListener("Minecraft server", progressGroup::createProgressLogger))
-						.downloadPathAsync(minecraftServerJar.toPath(), executor);
-			}
+	private void checkJars() throws IOException {
+		if (!minecraftClientJar.exists() || !minecraftServerJar.exists()){
+			throw new FileNotFoundException("Cannot find the 1.6.4-MITE jar file, please make sure the jar file is at: " + minecraftClientJar.getAbsolutePath());
 		}
 	}
 

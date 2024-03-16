@@ -67,7 +67,7 @@ public abstract class GenerateRemapClasspathTask extends AbstractLoomTask {
 	public void run() {
 		final List<File> remapClasspath = new ArrayList<>(getRemapClasspath().getFiles());
 
-		for (Path minecraftJar : getExtension().getMinecraftJars(MappingsNamespace.INTERMEDIARY)) {
+		for (Path minecraftJar : getExtension().getMinecraftJars(MappingsNamespace.OFFICIAL)) {
 			remapClasspath.add(minecraftJar.toFile());
 		}
 

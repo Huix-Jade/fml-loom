@@ -102,15 +102,16 @@ public abstract class InterfaceInjectionProcessor implements MinecraftJarProcess
 	@Override
 	public void processJar(Path jar, Spec spec, ProcessorContext context) throws IOException {
 		// Remap from intermediary->named
-		final MemoryMappingTree mappings = context.getMappings();
-		final int intermediaryIndex = mappings.getNamespaceId(MappingsNamespace.INTERMEDIARY.toString());
-		final int namedIndex = mappings.getNamespaceId(MappingsNamespace.NAMED.toString());
-		final List<InjectedInterface> remappedInjectedInterfaces = spec.injectedInterfaces().stream()
-				.map(injectedInterface -> remap(injectedInterface, s -> mappings.mapClassName(s, intermediaryIndex, namedIndex)))
-				.toList();
+		//MITE Loom: We dont have intermediary to map :)
+//		final MemoryMappingTree mappings = context.getMappings();
+//		final int intermediaryIndex = mappings.getNamespaceId(MappingsNamespace.INTERMEDIARY.toString());
+//		final int namedIndex = mappings.getNamespaceId(MappingsNamespace.NAMED.toString());
+//		final List<InjectedInterface> remappedInjectedInterfaces = spec.injectedInterfaces().stream()
+//				.map(injectedInterface -> remap(injectedInterface, s -> mappings.mapClassName(s, intermediaryIndex, namedIndex)))
+//				.toList();
 
 		try {
-			ZipUtils.transform(jar, getTransformers(remappedInjectedInterfaces));
+			ZipUtils.transform(jar, getTransformers(spec.injectedInterfaces));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to apply interface injections to " + jar, e);
 		}
@@ -148,9 +149,9 @@ public abstract class InterfaceInjectionProcessor implements MinecraftJarProcess
 	@Override
 	public MappingsProcessor<Spec> processMappings() {
 		return (mappings, spec, context) -> {
-			if (!MappingsNamespace.INTERMEDIARY.toString().equals(mappings.getSrcNamespace())) {
-				throw new IllegalStateException("Mapping tree must have intermediary src mappings not " + mappings.getSrcNamespace());
-			}
+//			if (!MappingsNamespace.INTERMEDIARY.toString().equals(mappings.getSrcNamespace())) {
+//				throw new IllegalStateException("Mapping tree must have intermediary src mappings not " + mappings.getSrcNamespace());
+//			}
 
 			Map<String, List<InjectedInterface>> map = spec.injectedInterfaces().stream()
 					.collect(Collectors.groupingBy(InjectedInterface::className));

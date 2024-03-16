@@ -24,6 +24,7 @@
 
 package net.fabricmc.loom;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -70,6 +71,11 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 
 	void setMinecraftProvider(MinecraftProvider minecraftProvider);
 
+	void setFML(String fmlVer);
+	void setFML(File fmlFile);
+
+	File getFML();
+
 	MappingConfiguration getMappingConfiguration();
 
 	void setMappingConfiguration(MappingConfiguration mappingConfiguration);
@@ -85,7 +91,8 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 	default List<Path> getMinecraftJars(MappingsNamespace mappingsNamespace) {
 		return switch (mappingsNamespace) {
 		case NAMED -> getNamedMinecraftProvider().getMinecraftJarPaths();
-		case INTERMEDIARY -> getIntermediaryMinecraftProvider().getMinecraftJarPaths();
+		//We dont have intermediary, so we treat it as named
+		case INTERMEDIARY -> getNamedMinecraftProvider().getMinecraftJarPaths();
 		case OFFICIAL -> getMinecraftProvider().getMinecraftJars();
 		};
 	}

@@ -26,6 +26,9 @@ package net.fabricmc.loom.api.mappings.layered.spec;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
+
+import net.fabricmc.loom.configuration.providers.mappings.fml_mcp.MCPMappingsSpecBuilderImpl;
+
 import org.gradle.api.Action;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -40,77 +43,85 @@ public interface LayeredMappingSpecBuilder {
 	 * Add a MappingsSpec layer.
 	 */
 	LayeredMappingSpecBuilder addLayer(MappingsSpec<?> mappingSpec);
+	LayeredMappingSpecBuilder fml(Object fileToFMLJar, Action<? super MCPMappingsSpecBuilderImpl> action);
+	default LayeredMappingSpecBuilder fml(Object fileToFMLJar){
+		return fml(fileToFMLJar, mcpMappingsSpecBuilder -> {});
+    }
 
-	/**
-	 * Add a layer that uses the official mappings provided by Mojang with the default decompilerOptions.
-	 */
-	default LayeredMappingSpecBuilder officialMojangMappings() {
-		return officialMojangMappings(builder -> { });
+	default LayeredMappingSpecBuilder fml(){
+		return fml(null, mcpMappingsSpecBuilder -> {});
 	}
 
-	/**
-	 * Configure and add a layer that uses the official mappings provided by Mojang.
-	 */
-	@SuppressWarnings("rawtypes")
-	default LayeredMappingSpecBuilder officialMojangMappings(@DelegatesTo(value = MojangMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-		return officialMojangMappings(new ClosureAction<>(closure));
-	}
+//	/**
+//	 * Add a layer that uses the official mappings provided by Mojang with the default decompilerOptions.
+//	 */
+//	default LayeredMappingSpecBuilder officialMojangMappings() {
+//		return officialMojangMappings(builder -> { });
+//	}
+//
+//	/**
+//	 * Configure and add a layer that uses the official mappings provided by Mojang.
+//	 */
+//	@SuppressWarnings("rawtypes")
+//	default LayeredMappingSpecBuilder officialMojangMappings(@DelegatesTo(value = MojangMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+//		return officialMojangMappings(new ClosureAction<>(closure));
+//	}
+//
+//	/**
+//	 * Configure and add a layer that uses the official mappings provided by Mojang.
+//	 */
+//	LayeredMappingSpecBuilder officialMojangMappings(Action<MojangMappingsSpecBuilder> action);
 
-	/**
-	 * Configure and add a layer that uses the official mappings provided by Mojang.
-	 */
-	LayeredMappingSpecBuilder officialMojangMappings(Action<MojangMappingsSpecBuilder> action);
-
-	default LayeredMappingSpecBuilder parchment(Object object) {
-		return parchment(object, parchmentMappingsSpecBuilder -> parchmentMappingsSpecBuilder.setRemovePrefix(true));
-	}
-
-	@SuppressWarnings("rawtypes")
-	default LayeredMappingSpecBuilder parchment(Object object, @DelegatesTo(value = ParchmentMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-		return parchment(object, new ClosureAction<>(closure));
-	}
-
-	LayeredMappingSpecBuilder parchment(Object object, Action<ParchmentMappingsSpecBuilder> action);
-
-	/**
-	 * Add a signatureFix layer. Reads the @extras/record_signatures.json" file in a jar file such as yarn.
-	 */
-	@ApiStatus.Experimental
-	LayeredMappingSpecBuilder signatureFix(Object object);
-
-	/**
-	 * Add a layer that uses a mappings file or directory.
-	 *
-	 * @param file the file notation for a {@link FileSpec}
-	 * @return this builder
-	 * @see FileMappingsSpecBuilder
-	 */
-	@ApiStatus.Experimental
-	default LayeredMappingSpecBuilder mappings(Object file) {
-		return mappings(file, builder -> { });
-	}
-
-	/**
-	 * Configure and add a layer that uses a mappings file or directory.
-	 *
-	 * @param file    the file notation for a {@link FileSpec}
-	 * @param closure the configuration action
-	 * @return this builder
-	 * @see FileMappingsSpecBuilder
-	 */
-	@ApiStatus.Experimental
-	default LayeredMappingSpecBuilder mappings(Object file, @DelegatesTo(value = FileMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure<?> closure) {
-		return mappings(file, new ClosureAction<>(closure));
-	}
-
-	/**
-	 * Configure and add a layer that uses a mappings file or directory.
-	 *
-	 * @param file   the file notation for a {@link FileSpec}
-	 * @param action the configuration action
-	 * @return this builder
-	 * @see FileMappingsSpecBuilder
-	 */
-	@ApiStatus.Experimental
-	LayeredMappingSpecBuilder mappings(Object file, Action<? super FileMappingsSpecBuilder> action);
+//	default LayeredMappingSpecBuilder parchment(Object object) {
+//		return parchment(object, parchmentMappingsSpecBuilder -> parchmentMappingsSpecBuilder.setRemovePrefix(true));
+//	}
+//
+//	@SuppressWarnings("rawtypes")
+//	default LayeredMappingSpecBuilder parchment(Object object, @DelegatesTo(value = ParchmentMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+//		return parchment(object, new ClosureAction<>(closure));
+//	}
+//
+//	LayeredMappingSpecBuilder parchment(Object object, Action<ParchmentMappingsSpecBuilder> action);
+//
+//	/**
+//	 * Add a signatureFix layer. Reads the @extras/record_signatures.json" file in a jar file such as yarn.
+//	 */
+//	@ApiStatus.Experimental
+//	LayeredMappingSpecBuilder signatureFix(Object object);
+//
+//	/**
+//	 * Add a layer that uses a mappings file or directory.
+//	 *
+//	 * @param file the file notation for a {@link FileSpec}
+//	 * @return this builder
+//	 * @see FileMappingsSpecBuilder
+//	 */
+//	@ApiStatus.Experimental
+//	default LayeredMappingSpecBuilder mappings(Object file) {
+//		return mappings(file, builder -> { });
+//	}
+//
+//	/**
+//	 * Configure and add a layer that uses a mappings file or directory.
+//	 *
+//	 * @param file    the file notation for a {@link FileSpec}
+//	 * @param closure the configuration action
+//	 * @return this builder
+//	 * @see FileMappingsSpecBuilder
+//	 */
+//	@ApiStatus.Experimental
+//	default LayeredMappingSpecBuilder mappings(Object file, @DelegatesTo(value = FileMappingsSpecBuilder.class, strategy = Closure.DELEGATE_FIRST) Closure<?> closure) {
+//		return mappings(file, new ClosureAction<>(closure));
+//	}
+//
+//	/**
+//	 * Configure and add a layer that uses a mappings file or directory.
+//	 *
+//	 * @param file   the file notation for a {@link FileSpec}
+//	 * @param action the configuration action
+//	 * @return this builder
+//	 * @see FileMappingsSpecBuilder
+//	 */
+//	@ApiStatus.Experimental
+//	LayeredMappingSpecBuilder mappings(Object file, Action<? super FileMappingsSpecBuilder> action);
 }
