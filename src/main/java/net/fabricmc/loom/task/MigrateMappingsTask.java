@@ -26,12 +26,22 @@ package net.fabricmc.loom.task;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+
+import net.fabricmc.loom.util.TinyRemapperHelper;
+import net.fabricmc.lorenztiny.TinyMappingsReader;
+import net.fabricmc.mappingio.MappingUtil;
+import net.fabricmc.tinyremapper.NonClassCopyMode;
+import net.fabricmc.tinyremapper.OutputConsumerPath;
+import net.fabricmc.tinyremapper.TinyRemapper;
+
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.mercury.Mercury;
 import org.cadixdev.mercury.remapper.MercuryRemapper;
@@ -46,6 +56,7 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
+import org.gradle.internal.impldep.org.apache.commons.codec.digest.DigestUtils;
 import org.gradle.work.DisableCachingByDefault;
 
 import net.fabricmc.loom.LoomGradleExtension;
@@ -84,7 +95,7 @@ public abstract class MigrateMappingsTask extends AbstractLoomTask {
 		this.outputDir = getProject().file(outputDir).toPath();
 	}
 
-	@Option(option = "mappings", description = "Target mappings")
+	@Option(option = "mappings", description = "The old mapping to create old mapped jar for remap reference")
 	public void setMappings(String mappings) {
 		this.mappings = mappings;
 	}
@@ -109,8 +120,8 @@ public abstract class MigrateMappingsTask extends AbstractLoomTask {
 		MappingConfiguration mappingConfiguration = extension.getMappingConfiguration();
 
 		try (var serviceManager = new ScopedSharedServiceManager()) {
-			MemoryMappingTree currentMappings = mappingConfiguration.getMappingsService(serviceManager).getMappingTree();
-			MemoryMappingTree targetMappings = getMappings(mappings);
+			MemoryMappingTree currentMappings = getMappings(mappings);
+			MemoryMappingTree targetMappings = mappingConfiguration.getMappingsService(serviceManager).getMappingTree();
 			migrateMappings(project, extension, inputDir, outputDir, currentMappings, targetMappings);
 			project.getLogger().lifecycle(":remapped project written to " + outputDir.toAbsolutePath());
 		} catch (IOException e) {
@@ -136,7 +147,7 @@ public abstract class MigrateMappingsTask extends AbstractLoomTask {
 				LayeredMappingsDependency dep = (LayeredMappingsDependency) getExtension().layered(LayeredMappingSpecBuilder::fml);
 				files = dep.resolve();
 			} else {
-				Dependency dependency = project.getDependencies().create(mappings);
+				Dependency dependency = project.getDependencies().create(project.files(mappings));
 				files = project.getConfigurations().detachedConfiguration(dependency).resolve();
 			}
 		} catch (IllegalDependencyNotation ignored) {
@@ -160,8 +171,12 @@ public abstract class MigrateMappingsTask extends AbstractLoomTask {
 	private static MemoryMappingTree getMappings(File mappings) throws IOException {
 		MemoryMappingTree mappingTree = new MemoryMappingTree();
 
-		try (FileSystemUtil.Delegate delegate = FileSystemUtil.getJarFileSystem(mappings.toPath())) {
-			MappingReader.read(delegate.fs().getPath("mappings/mappings.tiny"), mappingTree);
+		if (mappings.getName().endsWith(".jar")) {
+			try (FileSystemUtil.Delegate delegate = FileSystemUtil.getJarFileSystem(mappings.toPath())) {
+				MappingReader.read(delegate.fs().getPath("mappings/mappings.tiny"), mappingTree);
+			}
+		}else {
+			MappingReader.read(mappings.toPath(), mappingTree);
 		}
 
 		return mappingTree;
@@ -170,28 +185,42 @@ public abstract class MigrateMappingsTask extends AbstractLoomTask {
 	private static void migrateMappings(Project project, LoomGradleExtension extension,
 										Path inputDir, Path outputDir, MemoryMappingTree currentMappings, MemoryMappingTree targetMappings
 	) throws IOException {
-		project.getLogger().info(":joining mappings");
+		project.getLogger().info(":reading mappings");
 
-		MappingSet mappingSet = new TinyMappingsJoiner(
-				currentMappings, MappingsNamespace.NAMED.toString(),
-				targetMappings, MappingsNamespace.NAMED.toString(),
-				MappingsNamespace.INTERMEDIARY.toString()
-		).read();
-
+		MemoryMappingTree mappingTree = new MemoryMappingTree();
+		try (FileSystemUtil.Delegate jarFileSystem = FileSystemUtil.getJarFileSystem(extension.getFML().toPath())) {
+			MappingReader.read(jarFileSystem.fs().getPath("migrate.tiny"), mappingTree);
+		}
+		MappingSet mappingSet;
+		try (TinyMappingsReader tinyMappingsReader = new TinyMappingsReader(mappingTree, "left", "right")) {
+			mappingSet = tinyMappingsReader.read();
+		}
 		project.getLogger().lifecycle(":remapping");
 		Mercury mercury = SourceRemapper.createMercuryWithClassPath(project, false);
 
 		final JavaVersion javaVersion = project.getExtensions().getByType(JavaPluginExtension.class).getSourceCompatibility();
 		mercury.setSourceCompatibility(javaVersion.toString());
 
-		for (Path intermediaryJar : extension.getMinecraftJars(MappingsNamespace.INTERMEDIARY)) {
-			mercury.getClassPath().add(intermediaryJar);
+
+		project.getLogger().lifecycle(":remapping:remapOldJar");
+		for (Path minecraftJar : extension.getMinecraftJars(MappingsNamespace.OFFICIAL)) {
+			Path jar = extension.getFiles().getUserCache().toPath().resolve("fml-loom-remapsource-temp-mapped.jar");
+			TinyRemapper remapper = TinyRemapper.newRemapper()
+					.fixPackageAccess(true)
+					.withMappings(TinyRemapperHelper.create(currentMappings, "official", "named", true))
+					.build();
+			try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(jar).build()) {
+				remapper.readInputs(minecraftJar);
+				remapper.apply(outputConsumer);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				remapper.finish();
+			}
+			mercury.getClassPath().add(jar);
 		}
 
-		for (Path intermediaryJar : extension.getMinecraftJars(MappingsNamespace.NAMED)) {
-			mercury.getClassPath().add(intermediaryJar);
-		}
-
+		project.getLogger().lifecycle(":remapping:migrateSource");
 		mercury.getProcessors().add(MercuryRemapper.create(mappingSet));
 
 		try {
