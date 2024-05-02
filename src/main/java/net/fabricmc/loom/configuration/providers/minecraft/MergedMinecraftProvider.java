@@ -43,7 +43,7 @@ public final class MergedMinecraftProvider extends MinecraftProvider {
 	@Override
 	protected void initFiles() {
 		super.initFiles();
-		minecraftMergedJar = path("minecraft-merged.jar");
+		minecraftMergedJar = path("minecraft-merged+R"+ this.getExtension().getMITERelease() +".jar");
 	}
 
 	@Override

@@ -76,6 +76,9 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 
 	File getFML();
 
+	void setMITERelease(short num);
+	short getMITERelease();
+
 	MappingConfiguration getMappingConfiguration();
 
 	void setMappingConfiguration(MappingConfiguration mappingConfiguration);

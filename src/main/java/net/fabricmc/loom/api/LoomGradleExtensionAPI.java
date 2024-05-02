@@ -87,6 +87,9 @@ public interface LoomGradleExtensionAPI {
 
 	File getFML();
 
+	void setMITERelease(short num);
+	short getMITERelease();
+
 	Dependency fmlMCPMappings();
 
 	Dependency layered(Action<LayeredMappingSpecBuilder> action);

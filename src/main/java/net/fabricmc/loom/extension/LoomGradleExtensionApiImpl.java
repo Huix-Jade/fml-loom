@@ -99,6 +99,8 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	private final ListProperty<MinecraftJarProcessor<?>> minecraftJarProcessors;
 	protected final ListProperty<RemapperExtensionHolder> remapperExtensions;
 
+	protected final Property<Short> release_number;
+
 	// A common mistake with layered mappings is to call the wrong `officialMojangMappings` method, use this to keep track of when we are building a layered mapping spec.
 	protected final ThreadLocal<Boolean> layeredSpecBuilderScope = ThreadLocal.withInitial(() -> false);
 
@@ -107,7 +109,11 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 				.empty();
 		this.log4jConfigs = project.files(directories.getDefaultLog4jConfigFile());
 		this.accessWidener = project.getObjects().fileProperty();
+
 		this.fmlFile = project.getObjects().fileProperty();
+		this.release_number = project.getObjects().property(Short.class)
+				.convention((short) 196);;
+
 		this.customManifest = project.getObjects().property(String.class);
 		this.knownIndyBsms = project.getObjects().setProperty(String.class).convention(Set.of(
 				"java/lang/invoke/StringConcatFactory",
@@ -143,6 +149,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 
 		this.accessWidener.finalizeValueOnRead();
 		this.fmlFile.finalizeValueOnRead();
+		this.release_number.finalizeValueOnRead();
 		this.getGameJarProcessors().finalizeValueOnRead();
 
 		this.runtimeOnlyLog4j = project.getObjects().property(Boolean.class).convention(false);
@@ -223,6 +230,17 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	@Override
 	public void setFML(String fmlVer) {
 		throw new UnsupportedOperationException("Currently, FML should be specified in file, please use setFML(fmlFile)");
+	}
+
+
+	@Override
+	public void setMITERelease(short num) {
+		this.release_number.set(num);
+	}
+
+	@Override
+	public short getMITERelease() {
+		return this.release_number.get();
 	}
 
 	@Override

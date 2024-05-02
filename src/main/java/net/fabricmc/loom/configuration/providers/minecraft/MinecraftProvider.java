@@ -75,14 +75,14 @@ public abstract class MinecraftProvider {
 	public void provide() throws Exception {
 		final DependencyInfo dependency = DependencyInfo.create(getProject(), Constants.Configurations.MINECRAFT);
 		minecraftVersion = dependency.getDependency().getVersion();
-		if (!Objects.equals(minecraftVersion, "1.6.4-MITE")) throw new UnsupportedOperationException("This version of loom only support for 1.6.4-MITE");
+		//if (!Objects.equals(minecraftVersion, "1.6.4-MITE+" + this.getExtension().getMITERelease())) throw new UnsupportedOperationException("This version of loom only support for 1.6.4-MITE");
 		initFiles();
 
 		metadataProvider = new MinecraftMetadataProvider(
 				MinecraftMetadataProvider.Options.create(
 						"1.6.4",
 						getProject(),
-						file("minecraft-info.json").toPath()
+						file("minecraft-info+R" + this.getExtension().getMITERelease() + ".json").toPath()
 				),
 				getExtension()::download
 		);
@@ -102,18 +102,18 @@ public abstract class MinecraftProvider {
 		workingDir.mkdirs();
 
 		if (provideClient()) {
-			minecraftClientJar = file("1.6.4-MITE.jar");
+			minecraftClientJar = file("1.6.4-MITE+R" + this.getExtension().getMITERelease() + ".jar");
 		}
 
 		if (provideServer()) {
-			minecraftServerJar = file("1.6.4-MITE.jar");
-			minecraftExtractedServerJar = file("minecraft-extracted_server.jar");
+			minecraftServerJar = file("1.6.4-MITE+R" + this.getExtension().getMITERelease() + ".jar");
+			minecraftExtractedServerJar = file("minecraft-extracted_server.jar+R" + this.getExtension().getMITERelease());
 		}
 	}
 
 	private void checkJars() throws IOException {
 		if (!minecraftClientJar.exists() || !minecraftServerJar.exists()){
-			throw new FileNotFoundException("Cannot find the 1.6.4-MITE jar file, please make sure the jar file is at: " + minecraftClientJar.getAbsolutePath());
+			throw new FileNotFoundException("Cannot find the  1.6.4-MITE+R" + this.getExtension().getMITERelease() + "jar file, please make sure the jar file is at: " + minecraftClientJar.getAbsolutePath());
 		}
 	}
 

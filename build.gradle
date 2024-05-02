@@ -50,14 +50,15 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 group = 'net.xiaoyu233'
-def baseVersion = '0.1'
+def baseVersion = '1.4.5'
+version = baseVersion
 
 def ENV = System.getenv()
-if (ENV.BUILD_NUMBER) {
-	version = baseVersion + '.' + ENV.BUILD_NUMBER
-} else {
-	version = baseVersion + '.local'
-}
+//if (ENV.BUILD_NUMBER) {
+//	version = baseVersion + '.' + ENV.BUILD_NUMBER
+//} else {
+//	version = baseVersion + '.local'
+//}
 
 // We must build against the version of Kotlin Gradle ships with.
 def kotlinVersion = KotlinDslVersion.current().getKotlinVersion()
